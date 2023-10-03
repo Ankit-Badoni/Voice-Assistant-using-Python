@@ -1,0 +1,91 @@
+import speech_recognition as sr
+import pyttsx3 as tts
+import pywhatkit as wk
+import datetime as dt
+import wikipedia as wiki
+import webbrowser
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+
+r=sr.Recognizer()
+speaker=tts.init()
+voices=speaker.getProperty('voices')
+speaker.setProperty('voice',voices[1].id) # To set the female voice
+
+def setCommand():
+    "This function is used to take voice input from the user"
+    
+    with sr.Microphone() as source:
+        print(".           Listening......")
+        try:
+            voice=r.listen(source)
+            r.energy_threshold =400
+            r.pause_threshold = 1
+            command=r.recognize_google(voice)
+            print("YOU:",command)
+            command=command
+            return command
+        except:
+            text="Sorry couldn't process it at this moment please try again"
+            print(text)
+            exit()
+    
+    
+def speak(command):
+    "This function is used to make your voice assistant capable to speak."
+    print("Assistant:",command)
+    speaker.say(command)
+    speaker.runAndWait()
+
+def execution():
+    "This is main executable function which perform all the task given by the user"
+    
+    audio=setCommand()
+    audio=audio.lower()
+    
+    if 'play' in audio:
+        song=audio.replace('play','')
+        speak('playing '+song)
+        wk.playonyt(song)
+    elif 'the time' in audio:
+        time=dt.datetime.now().strftime('%I:%M %p')
+        speak("the current time is "+time)
+    elif 'who is' in audio:
+        data=audio.replace("who is",'')
+        try:
+            info=wiki.summary(data,3)
+            speak(info)
+        except:
+            speak("Sorry,I couldn't find this in wikipedia ")       
+    elif 'open youtube' in audio:
+        speak('opening youtube')
+        webbrowser.open("youtube.com")
+    elif 'open google' in audio:
+        speak('opening google')
+        webbrowser.open_new_tab("google.com")
+    elif 'open facebook' in audio:
+        speak('opening facebook')
+        webbrowser.open_new_tab("facebook.com")
+    elif 'open instagram' in audio:
+        speak('opening instagram')
+        webbrowser.open_new_tab("Instagram.com")
+    elif 'open whatsapp' in audio:
+        speak('opening whatsapp')
+        webbrowser.open_new_tab("whatsapp.com")
+    elif 'open twitter' in audio:
+        speak('opening twitter')
+        webbrowser.open_new_tab("twitter.com")
+    elif 'search' in audio:
+        data=audio.replace('search','')
+        data=data.replace('in google','')
+        speak("searching "+data+" in google")
+        global driver
+        driver=webdriver.Chrome()
+        driver.get("https://www.google.com/")
+        find=driver.find_element("name", "q")
+        find.send_keys(data)
+        find.send_keys(Keys.ENTER)
+    else:
+        speak("sorry i can't process this command ")
+    
+execution()
